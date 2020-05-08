@@ -1,16 +1,16 @@
 class Node(object):
-  # index = index in the Hashmap
+  # key = index in the Hashmap
   # data = data of Node (integer)
   def __init__(self, data):
-    self.index = None
+    self.key = None
     self.data = data
     self.next = None
 
   def __repr__(self):
-    if self.index != None:
-      return "<Node index: %d data: %d>" % (self.index, self.data)
+    if self.key != None:
+      return "<Node key: %d data: %d>" % (self.key, self.data)
     else:
-        return "<Node index: %s data: %d>" % (self.index, self.data)
+      return "<Node key: %s data: %d>" % (self.key, self.data)
 
 # A Linked List of Node Objects
 class LinkedList(object):
@@ -79,5 +79,5 @@ class LinkedList(object):
         else:
           previous = self.current
           self.current = self.current.next
-      return 'Node is not here'
+      return 'Node is not in LinkedList'
 

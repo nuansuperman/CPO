@@ -1,4 +1,4 @@
-from linkedlist import LinkedList
+from linkedlist_mutable import LinkedList
 
 class Hashmap(object):
 
@@ -12,18 +12,18 @@ class Hashmap(object):
     self.length = length
 
   def hash(self, data):
-    index = data % self.length+1
-    return index
+    key = data % self.length+1
+    return key
 
   def insert(self, node):
-    index = self.hash(node.data)
-    node.index = index
-    insertOutput = self.buckets[index].insert(node)
+    key = self.hash(node.data)
+    node.key = key
+    insertOutput = self.buckets[key].insert(node)
     return insertOutput
 
   def remove(self, data):
-    index = self.hash(data)
-    removedOutput = self.buckets[index].remove(data)
+    key = self.hash(data)
+    removedOutput = self.buckets[key].remove(data)
     return removedOutput
 
   def __repr__(self):
