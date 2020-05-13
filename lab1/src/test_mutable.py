@@ -1,6 +1,9 @@
 from linkedlist_mutable import Node
 from linkedlist_mutable import LinkedList
 from hashmap_mutable import Hashmap
+
+from hypothesis import given
+import hypothesis.strategies as st
 import unittest
 
 class Test_LinkedList(unittest.TestCase):
@@ -48,11 +51,76 @@ class Test_LinkedListMethods(Test_LinkedList):
 
   def test_str(self):
     output = str(self.linkedlist)
+    print(repr(self.linkedlist))
     self.assertEqual(output, '<LinkedList: 0 nodes>')
 
   def test_repr(self):
     output = repr(self.linkedlist)
     self.assertEqual(output, 'LinkedList: Nodes: []')
+
+  def test_to_list(self):
+    self.assertEqual(self.linkedlist.to_list(), [])
+    self.linkedlist.insert(Node(10))
+    self.assertEqual(self.linkedlist.to_list(), [10])
+    self.linkedlist.insert(Node(210))
+    self.assertEqual(self.linkedlist.to_list(), [10,210])
+
+  def test_from_list(self):
+      test_data = [[],[10],[10, 210]]
+      for e in test_data:
+        lst = LinkedList()
+        lst.from_list(e)
+        self.assertEqual(lst.to_list(), e)
+
+  def test_find_uneven(self):
+    self.assertEqual(self.linkedlist.find_uneven(), [])
+    self.linkedlist.insert(Node(11))
+    self.assertEqual(self.linkedlist.find_uneven(), [11])
+    self.linkedlist.insert(Node(210))
+    self.assertEqual(self.linkedlist.find_uneven(), [11])
+
+  def test_filter_uneven(self):
+    self.assertEqual(self.linkedlist.filter_uneven(), 'Linked List is empty')
+    self.linkedlist.insert(Node(10))
+    self.assertEqual(self.linkedlist.filter_uneven(), 'No uneven is  in LinkedList')
+    self.linkedlist.insert(Node(11))
+    self.assertEqual(self.linkedlist.filter_uneven(), 'Uneven was removed from the LinkedList')
+
+
+  def test_map(self):
+    lst = LinkedList()
+    lst.map(str)
+    self.assertEqual(lst.to_list(), [])
+    lst = LinkedList()
+    lst.from_list([1, 2, 3])
+    lst.map(str)
+    self.assertEqual(lst.to_list(), ["1", "2", "3"])
+
+  def test_reduce(self):
+    # sum of empty list
+    lst = LinkedList()
+    self.assertEqual(lst.reduce(lambda st, e: st + e, 0), 0)
+    # sum of list
+    lst = LinkedList()
+    lst.from_list([1, 2, 3])
+    self.assertEqual(lst.reduce(lambda st, e: st + e, 0), 6)
+    # size
+    test_data = [
+      [],
+      ['a'],
+      ['a', 'b']
+    ]
+    for e in test_data:
+      lst = LinkedList()
+    lst.from_list(e)
+    self.assertEqual(lst.reduce(lambda st, _: st + 1, 0), lst.__len__())
+
+  @given(st.lists(st.integers()))
+  def test_from_list_to_list_equality(self, nethash):
+    lst = LinkedList()
+    lst.from_list(nethash)
+    b=lst.to_list()
+    self.assertEqual(nethash, b)
 
 class TestCaseHashMap(unittest.TestCase):
   def setUp(self):

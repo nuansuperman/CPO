@@ -1,10 +1,10 @@
 class Node(object):
   # key = index in the Hashmap
   # data = data of Node (integer)
-  def __init__(self, data):
+  def __init__(self, data,next=None):
     self.key = None
     self.data = data
-    self.next = None
+    self.next = next
 
   def __repr__(self):
     if self.key != None:
@@ -58,6 +58,73 @@ class LinkedList(object):
       node = node.next
     return 'LinkedList: Nodes: %r' % nodes
 
+  def to_list(self):
+    res = []
+    node = self.head
+    while not node is None:
+      res.append(node.data)
+      node = node.next
+    return res
+
+  def from_list(self,lst):
+    if len(lst) == 0:
+      self.head = None
+      return
+    head = None
+    for e in reversed(lst):
+      head = Node(e,head)
+      self.head = head
+
+  def find_uneven(self):
+    res = []
+    node = self.head
+    while not node is None:
+      if node.data%2==1:
+        res.append(node.data)
+        node = node.next
+      else:
+        node=node.next
+    return res
+
+  def filter_uneven(self):
+    previous = None
+    self.current = self.head
+    if self.current is None:
+      return 'Linked List is empty'
+    else:
+      while self.current != None:
+        if self.current.data %2==1:
+          # Remove the value from the Linked List
+          if len(self) is 1:
+            previous = None
+            self.current = None
+            self.head = None
+          else:
+            previous.next = self.current.next
+            self.current = None
+          return 'Uneven was removed from the LinkedList'
+        else:
+          previous = self.current
+          self.current = self.current.next
+      return 'No uneven is  in LinkedList'
+
+
+
+
+  def map(self, f):
+      cur = self.head
+      while cur is not None:
+        cur.data = f(cur.data)
+        cur = cur.next
+
+  def reduce(self, f, initial_state):
+      state = initial_state
+      cur = self.head
+      while cur is not None:
+        state = f(state, cur.data)
+        cur = cur.next
+      return state
+
   def remove(self, value):
     previous = None
     self.current = self.head
@@ -80,4 +147,6 @@ class LinkedList(object):
           previous = self.current
           self.current = self.current.next
       return 'Node is not in LinkedList'
+
+
 
