@@ -1,151 +1,145 @@
-from hashmap_mutable import Hashmap
+def hash(Node, length):
+    key = Node.data % length
+    Node.key = key
+    return key
 
 
-class hashmap(object):
-    def __init__(self,datas=None):
-        self.hashtable = [[None for i in range(1)] for j in range(15)]
-        self.length = 15
-        if datas is not None:
-            for data in datas:
-                insert(self, data)
-
-
-def insert(n, value):
-    key = value % n.length
-    if n.hashtable[key][0] is None:
-        n.hashtable[key][0] =value
+def insert(node, buckets):
+    key = hash(node, len(buckets))
+    node.key = key
+    insert_node = form(buckets[key],node)
+    if insert_node:
+        return 1
     else:
-        flag = 1
-        while n.hashtable[key][flag] != None &n.hashtable[key][flag] != value:
-            flag = flag+1
-        n.hashtable[key][flag] = value
+        return 0
 
 
-def size(n):
-    s = 0
-    if n is None:
+def size(node):
+    if node is None:
         return 0
     else:
-        for i in range(n.length):
-            for j in range(len(n.hashtable[i])):
-                if n.hashtable[i][j] != None:
-                    s += 1
-        return s
+        return 1 + size(node.next)
 
 
-
-# conversion to python lists
-def to_list(n):
-    newlist = []
-    for i in range(n.length):
-        for j in range(len(n.hashtable[i])):
-            if n.hashtable[i][j] != None:
-                newlist.append(n.hashtable[i][j])
-    return newlist
-
-
-#  conversion from python lists
-def from_list(n, list):
-    newtable = list
-    for i in range(len(newtable)):
-        insert(n, newtable[i])
-
-
-def map(n,f):
-    for i in range(n.length):
-        for j in range(len(n.hashtable[i])):
-            if n.hashtable[i][j] != None:
-                n.hashtable[i][j] = f(n.hashtable[i][j])
-
-
-# process structure elements to build a return value by specific functions
-def reduce(n,m):
-    sum =0
-    a = 0
-    for i in range(n.length):
-        for j in range(len(n.hashtable[i])):
-            if n.hashtable[i][j] != None:
-                sum += n.hashtable[i][j]
-                a +=1
-    if (m == 'sum'):
-        return sum
-    elif (m == 'table'):
-        return sum/a
-
-
-def mconcat(n,m):
-    res = to_list(m)
-    for data in res:
-        insert(n, data)
-    return n
-
-
-# remove an element
-def remove(n,value):
-    key =value %n.length
-    if n.hashtable[key][0] is None:
-        return false
+# remove hashNode
+def remove_hashmap(node, buckets):
+    key = hash(node, len(buckets))
+    remove_node = remove(buckets[key], node.data)
+    if remove_node:
+        return 1
     else:
-        for i in range(len(n.hashtable[key])):
-            if n.hashtable[key][i] == value:
-                n.hashtable[key][i] == n.hashtable[key][len(n.hashtable[key])-1]
-                n.hashtable[key].pop()
-                break
-            while i == len(n.hashtable[key]) -1:
-                return false
+        return 0
+
+
+def to_list(head):
+    list = []
+    # list_keys = []
+    res = head.next
+    while res is not None:
+        list.append([res.key, res.data])
+        res = res.next
+    return list
+
+
+def from_list(nodes):
+    head = Node(None, None, None)
+    root = None
+    if len(nodes) == 0:
+        return head
+    for d in reversed(nodes):
+        root = Node(d[0], d[1], root)
+    head.next = root
+    return head
+
+
+# add a new Node to head of the list
+def form(head, node):
+    node.next = head.next
+    head.next = node
+    return head
+
+
+#  delete the data of data of the list, return the Node that we cancel
+def remove(head, data):
+    res = head.next
+    p = head
+
+    while res is not None:
+        if res.data == data:
+            cancel = res
+            p.next = res.next
+            res = res.next
+        else:
+            res =res.next
+    return cancel
+
+
+def head(node):
+    assert type(node) is Node
+    return node.data
+
+
+def tail(node):
+    assert type(node) is Node
+    return node.next
 
 
 def mempty():
     return None
 
 
-#  find element by specific predicate
-def find_iseven(n):
-    newlist1 = []
-    newlist2 = []
-    for i in range(n.length):
-        for j in range(len(n.hashtable[i])):
-            if n.hashtable[i][j] != None:
-                newlist1.append(n.hashtable[i][j])
-    for m in range(len(newlist1)):
-        if newlist1[m] % 2 == 1:
-            newlist2.append(newlist1[m])
-    return newlist2
-
-
-#  filter data structure by specific predicate
-def filter_iseven(n):
-    newlist1 = []
-    newlist2 = []
-    for i in range(n.length):
-        for j in range(len(n.hashtable[i])):
-            if n.hashtable[i][j] != None:
-                newlist1.append(n.hashtable[i][j])
-    for m in range(len(newlist1)):
-        if newlist1[m] % 2 == 1:
-            newlist2.append(newlist1[m])
-    return newlist2
-
-
-def iterator(n):
-    if n is not None:
-        cur = []
-        for i in range(n.length):
-            for j in range(len(n.hashtable[i])):
-                if n.hashtable[i][j] != None:
-                    cur.append(n.hashtable[i][j])
-        b = iter(cur)
+def mconcat(head1, head2):
+    if head1.next is None:
+        return head2
+    if head2.next is None:
+        return head1
     else:
-        b = None
+        res = head1
+        while res.next is not None:
+            res = res.next
+        res.next = head2.next
+    return head1
 
-    def get_next():
-        if b is None:
-            return False
+
+def iterator(head):
+    if head is not None:
+        res = head.next
+
+        def foo():
+            nonlocal res
+            if res is None:
+                raise StopIteration
+            tmp = [res.key, res.data]
+            res = res.next
+            return tmp
+
+        return foo
+    else:
+        raise StopIteration
+
+
+class Node(object):
+    def __init__(self, key=None, data=None, next=None):
+        self.key = key
+        self.data = data
+        self.next = next
+
+    def __repr__(self):
+        if self.key != None:
+            return "<Node key: %d data: %d>" % (self.key, self.data)
         else:
-            return next(b)
-    return get_next
+            return "<Node key: %s data: %d>" % (self.key, self.data)
 
+    def __str__(self):
+        if type(self.next) is Node:
+            return "key: data : next".format(self.key, self.data, self.next)
+        return "key : data".format(self.key,self.data)
 
-
-
-
+    def __eq__(self, other):
+        if other is None:
+            return False
+        if self.data != other.data:
+            return False
+        if self.key != other.key:
+            return False
+        return self.next == other.next
