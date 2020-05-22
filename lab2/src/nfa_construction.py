@@ -79,7 +79,6 @@ class NFA:
             first_run = False
 
     def is_accepting(self):
-        #ds
         # accepts if we are in ANY accept states
         # ie. if in_states and accept_states share any states in common
         return len(self.in_states & self.accept_states) > 0
