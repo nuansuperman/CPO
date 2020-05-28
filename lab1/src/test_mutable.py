@@ -1,10 +1,11 @@
-from linkedlist_mutable import Node
-from linkedlist_mutable import LinkedList
-from hashmap_mutable import Hashmap
+from linkedlist_mutable import *
 
+from hashmap_mutable import Hashmap
 from hypothesis import given
 import hypothesis.strategies as st
 import unittest
+
+
 
 class Test_LinkedList(unittest.TestCase):
   def setUp(self):
@@ -51,7 +52,6 @@ class Test_LinkedListMethods(Test_LinkedList):
 
   def test_str(self):
     output = str(self.linkedlist)
-    print(repr(self.linkedlist))
     self.assertEqual(output, '<LinkedList: 0 nodes>')
 
   def test_repr(self):
@@ -121,6 +121,45 @@ class Test_LinkedListMethods(Test_LinkedList):
     lst.from_list(nethash)
     b=lst.to_list()
     self.assertEqual(nethash, b)
+
+  @given(st.lists(st.integers()))
+  def test_python_len_and_list_size_equality(self, a):
+    lst = LinkedList()
+    lst.from_list(a)
+    self.assertEqual(lst.__len__(), len(a))
+
+  @given(st.lists(st.integers()))
+  def test_monoid_identity(self,lst):
+    a=LinkedList()
+    a.from_list(lst)
+    self.assertEqual(mconcat(mempty(),a),a)
+    self.assertEqual(mconcat(a,mempty()), a)
+
+  @given(a=st.lists(st.integers(3)),b=st.lists(st.integers(5)),c=st.lists(st.integers(9)))
+  def test_monoid_associativity(self,a,b,c):
+    l1=LinkedList()
+    l1.from_list(a)
+    l2=LinkedList()
+    l2.from_list(b)
+    l3=LinkedList()
+    l3.from_list(c)
+    aa=mconcat(mconcat(l1,l2),l3).to_list()
+    bb=mconcat(l1,mconcat(l2,l3)).to_list()
+    self.assertEqual(aa.sort(),bb.sort())
+
+
+  def test_iter(self):
+    x = [1, 2, 3]
+    lst = LinkedList()
+    lst.from_list(x)
+    tmp = []
+    tmp_node = lst.head
+    while not tmp_node is None:
+      tmp.append(tmp_node.data)
+      tmp_node=tmp_node.next
+    self.assertEqual(x, tmp)
+    self.assertEqual(lst.to_list(), tmp)
+
 
 class TestCaseHashMap(unittest.TestCase):
   def setUp(self):

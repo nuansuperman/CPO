@@ -1,120 +1,342 @@
-class NFA:
+from src.nfa_construction import *
+from graphviz import Digraph
+
+#epsilon edge
+EPSILON = -1
+# Edges correspond to character sets
+CS = -2
+#The corresponding node has two outgoing epsilon sides
+EMPTY = -3
+ASCII_COUNT = 127
+
+# NFA
+class Nfa(object):
+    # the number of Node
+    STATENUM = 0
+
     def __init__(self):
-        """Creates a blank NFA"""
-        self.alphabet = set()
-        self.states = {0}
-        self.transition_function = {}
-        self.accept_states = set()
-        self.in_states = {0}
+        self.edge = EPSILON
+        self.next1 = None
+        self.next2 = None
+        self.input_set = set()
+        self.set_state_num()
+        self.flag = False
 
-    def add_state(self, state, accepts=False):
-        self.states.add(state)
+    def set_state_num(self):
+        self.state_num = Nfa.STATENUM
+        Nfa.STATENUM = Nfa.STATENUM + 1
 
-        if accepts:
-            self.accept_states.add(state)
+    def set_input_set(self):
+        self.input_set = set()
+        for i in range(ASCII_COUNT):
+            self.input_set.add(chr(i))
 
-    def add_transition(self, from_state, symbol, to_states):
-        self.transition_function[(from_state, symbol)] = to_states
 
-        if symbol != "":
-            self.alphabet.add(symbol)
+class NfaPair(object):
+    def __init__(self):
+        self.first_node = None
+        self.last_node = None
 
-    def feed_symbol(self, symbol):
-        """
-        Feeds a symbol into the NFA, calculating which states the
-        NFA is now in, based on which states it used to be in
-        """
-        if self.is_dead():
-            return
-        new_states = set()
 
-        for state in self.in_states:
-            pair = (state, symbol)
-            # check for a legal transition from the old state to a
-            # new state, based on what symbol was fed in
-            if pair in self.transition_function:
-                new_states |= self.transition_function[pair]
-        self.in_states = new_states
-        self.feed_empty()
+# Visualization as a finite state machine
+def get_visualize(first_node):
+    dot = Digraph(comment='Visualization table')
+    cur = []
+    cur.append("digraph G :")
+    def visualize(first_node, cur):
+        next1 = first_node.next1 is not None
+        next2 = first_node.next2 is not None
 
-    def feed_symbols(self, symbols, return_if_dies=False):
-        for symbol in symbols:
-            self.feed_symbol(symbol)
+        if next1:
+            cur.append(" {} -> {} [label=\"{}\"];".format(first_node.state_num, first_node.next1.state_num, first_node.edge))
+        if next2:
+            cur.append(" {} -> {} [label=\"{}\"];".format(first_node.state_num, first_node.next2.state_num, first_node.edge))
+        first_node.flag = True
+        if first_node.next1 is not None and not first_node.next1.flag:
+            visualize(first_node.next1, cur)
+        if first_node.next2 is not None and not first_node.next2.flag:
+            visualize(first_node.next2, cur)
+        return "\n".join(cur)
 
-            if return_if_dies and self.is_dead():
-                return
+    return visualize(first_node, cur)+"\n}"
 
-    def feed_empty(self):
-        """
-        Continuously feeds empty strings into the NFA until they fail
-        to cause any further state transitions
-        """
-        if self.is_dead():
-            return
-        old_states_len = None
-        # set of states that will be fed the empty string on the next pass
-        unproc_states = self.in_states
-        first_run = True
 
-        # keep feeding the empty string until no more new states are transitioned into
-        while first_run or len(self.in_states) > old_states_len:
-            old_states_len = len(self.in_states)
-            # set of new states transitioned into after the empty string was fed
-            new_states = set()
+morphology = None
 
-            # process each state in turn
-            for state in unproc_states:
-                pair = (state, "")
 
-                # check if this state has a transition using the empty string
-                # to another state
-                if pair in self.transition_function:
-                    # add the new state to a set to be added to self.in_states later
-                    new_states |= self.transition_function[pair]
+def pattern(pattern_string):
+    global morphology
+    morphology = Morphology(pattern_string)
+    morphology.advance()
+    nfa_pair = NfaPair()
+    # group(nfa_pair)    # ???gai sub
 
-            # merge new states back into "in" states
-            self.in_states |= new_states
-            # all new states discovered will be fed the empty string on the next pass
-            unproc_states = new_states
-            first_run = False
+    return nfa_pair.first_node
 
-    def is_accepting(self):
-        # accepts if we are in ANY accept states
-        # ie. if in_states and accept_states share any states in common
-        return len(self.in_states & self.accept_states) > 0
 
-    def is_dead(self):
-        return len(self.in_states) == 0
+# use Bottom-up method
+# # Matches. a (single character) []
+def term(pair_out):
+    if morphology.match(Symbol.L):
+        nfa_single(pair_out)
+    elif morphology.match(Symbol.ANY):
+        nfa_dot(pair_out)
 
-    def reset(self):
-        self.in_states = {0}
-        self.feed_empty()
 
-    # def __str__(self):
-    #     """
-    #     String representation of this NFA.
-    #     Useful for debugging.
-    #     """
-    #     return "NFA:\n" \
-    #            "Alphabet: {}\n" \
-    #            "States: {}\n" \
-    #            "Transition Function: {}\n" \
-    #            "Accept States: {}\n" \
-    #            "In states: {}\n" \
-    #            "Accepting: {}\n"\
-    #         .format(self.alphabet,
-    #                 self.states,
-    #                 self.transition_function,
-    #                 self.accept_states,
-    #                 self.in_states,
-    #                 "Yes" if self.is_accepting() else "No")
+# Match a single character
+def nfa_single(pair_out):
+    if not morphology.match(Symbol.L):
+        return False
 
-    def __eq__(self, other):
-        """
-        Checks if two NFAs are equal. Used for testing.
-        """
-        return self.states == other.states \
-           and self.transition_function == other.transition_function \
-           and self.accept_states == other.accept_states
+    begin = pair_out.first_node = Nfa()
+    pair_out.last_node = pair_out.first_node.next1 = Nfa()
+    begin.edge = morphology.morcontent
+    morphology.advance()
+    return True
 
+
+# . Matches any single character
+def nfa_dot(pair_out):
+    if not morphology.match(Symbol.ANY):
+        return False
+
+    begin = pair_out.first_node = Nfa()
+    pair_out.last_node = pair_out.first_node.next1 = Nfa()
+    begin.edge = CS
+    begin.set_input_set()
+
+    morphology.advance()
+    return False
+
+
+# factor connect
+def factor_conn(pair_out):
+    if is_conn(morphology.current_state):
+        factor(pair_out)
+
+    while is_conn(morphology.current_state):
+        pair = NfaPair()
+        factor(pair)
+        pair_out.last_node.next1 = pair.first_node
+        pair_out.last_node = pair.last_node
+
+    return True
+
+
+def is_conn(state):
+    condition = [
+        Symbol.OPEN_PAREN,
+        Symbol.CLOSE_PAREN,
+        Symbol.AT_EOL,
+        Symbol.EOS,
+        Symbol.CLOSURE,
+        Symbol.PLUS_CLOSE,
+        Symbol.CCL_END,
+        Symbol.AT_BOL,
+        Symbol.OR,
+    ]
+    return state not in condition
+
+
+
+# factor * + ? closure
+def factor(pair_out):
+    term(pair_out)
+    if morphology.match(Symbol.CLOSURE):
+        nfa_star_closure(pair_out)
+    elif morphology.match(Symbol.PLUS_CLOSE):
+        nfa_plus_closure(pair_out)
+    elif morphology.match(Symbol.OPTIONAL):
+        nfa_option_closure(pair_out)
+
+
+# * closure operations
+def nfa_star_closure(pair_out):
+    if not morphology.match(Symbol.CLOSURE):
+        return False
+    begin = Nfa()
+    end = Nfa()
+    begin.next1 = pair_out.first_node
+    begin.next2 = end
+
+    pair_out.last_node.next1 = pair_out.first_node
+    pair_out.last_node.next2 = end
+
+    pair_out.first_node = begin
+    pair_out.last_node = end
+
+    morphology.advance()
+    return True
+
+
+# + is closure
+def nfa_plus_closure(pair_out):
+    if not morphology.match(Symbol.PLUS_CLOSE):
+        return False
+    begin = Nfa()
+    end = Nfa()
+    begin.next1 = pair_out.first_node
+
+    pair_out.last_node.next1 = pair_out.first_node
+    pair_out.last_node.next2 = end
+
+    pair_out.first_node = begin
+    pair_out.last_node = end
+
+    morphology.advance()
+    return True
+
+# ?
+def nfa_option_closure(pair_out):
+    if not morphology.match(Symbol.OPTIONAL):
+        return False
+    begin = Nfa()
+    end = Nfa()
+
+    begin.next1 = pair_out.first_node
+    begin.next2 = end
+    pair_out.last_node.next1 = end
+
+    pair_out.first_node = begin
+    pair_out.last_node = end
+
+    morphology.advance()
+    return True
+
+
+def expr(pair_out):
+    factor_conn(pair_out)
+    pair = NfaPair()
+
+    while morphology.match(Symbol.OR):
+        morphology.advance()
+        factor_conn(pair)
+        begin = Nfa()
+        begin.next1 = pair.first_node
+        begin.next2 = pair_out.first_node
+        pair_out.first_node = begin
+
+        end = Nfa()
+        pair.last_node.next1 = end
+        pair_out.last_node.next2 = end
+        pair_out.last_node = end
+
+    return True
+
+'''
+def group(pair_out):
+    global groupCount
+    if morphology.match(Symbol.OPEN_PAREN):
+        groupCount = groupCount+1
+        morphology.advance()
+        expr(pair_out)
+        if morphology.match(Symbol.CLOSE_PAREN):
+            morphology.advance()
+    elif morphology.match(Symbol.EOS):
+        return False
+    else:
+        expr(pair_out)
+
+    while True:
+        pair = NfaPair()
+        if morphology.match(Symbol.OPEN_PAREN):
+            groupCount = groupCount + 1
+            morphology.advance()
+            expr(pair)
+            pair_out.last_node.next1 = pair.first_node
+            pair_out.last_node = pair.last_node
+            if morphology.match(Symbol.CLOSE_PAREN):
+                morphology.advance()
+        elif morphology.match(Symbol.EOS):
+            return False
+        else:
+            expr(pair)
+            pair_out.last_node.next1 = pair.first_node
+            pair_out.last_node = pair.last_node
+'''
+
+
+def match(in_string, nfa_machine):
+    lst = []
+    first_node = nfa_machine
+
+    current_nfa_set = [first_node]
+    next_nfa_set = closure(current_nfa_set)
+
+    for i, str in enumerate(in_string):
+        current_nfa_set = move(next_nfa_set, str)
+        next_nfa_set = closure(current_nfa_set)
+
+        if next_nfa_set is None:
+            return None
+        else:
+            lst.append(str)
+
+        if accepted_state(next_nfa_set) and i == len(in_string) - 1:
+            return lst
+
+    return None
+'''
+def match2(in_string, nfa_machine,groupID):
+    ls = []
+    first_node = nfa_machine
+    current_nfa_set = [first_node]
+    next_nfa_set = closure(current_nfa_set)
+
+    for i, ch in enumerate(in_string):
+        current_nfa_set = move(next_nfa_set, ch)
+        next_nfa_set = closure(current_nfa_set)
+
+        if next_nfa_set is None:
+            return None
+        elif groupID==0:
+            ls.append(ch)
+        elif ( len(current_nfa_set)!=0 and current_nfa_set[0].groupID==groupID):
+            ls.append(ch)
+
+        if accepted_state(next_nfa_set) and i == len(in_string) - 1:
+            return ls
+
+    return None
+'''
+
+
+def closure(input_set):
+    if len(input_set) <= 0:
+        return None
+
+    stack = []
+    for i in input_set:
+        stack.append(i)
+
+    while len(stack) > 0:
+        nfa = stack.pop()
+        next1 = nfa.next1
+        next2 = nfa.next2
+        if next1 is not None and nfa.edge == EPSILON:
+            if next1 not in input_set:
+                input_set.append(next1)
+                stack.append(next1)
+
+        if next2 is not None and nfa.edge == EPSILON:
+            if next2 not in input_set:
+                input_set.append(next2)
+                stack.append(next2)
+
+    return input_set
+
+
+def move(input_set, str):
+    output_set = []
+    for nfa in input_set:
+        if nfa.edge == str or (nfa.edge == CS and str in nfa.input_set):
+            output_set.append(nfa.next1)
+
+    return output_set
+
+# Match success
+def accepted_state(nfa_set):
+    for nfa in nfa_set:
+        if nfa.next1 is None and nfa.next2 is None:
+            return True
 

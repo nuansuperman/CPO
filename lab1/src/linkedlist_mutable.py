@@ -36,6 +36,7 @@ class LinkedList(object):
     self.current = self.head
     # Add to front of List if it is Empty
     if self.head is None:
+
       self.head = node
       return self.head
     else:
@@ -117,6 +118,7 @@ class LinkedList(object):
         cur.data = f(cur.data)
         cur = cur.next
 
+
   def reduce(self, f, initial_state):
       state = initial_state
       cur = self.head
@@ -147,6 +149,29 @@ class LinkedList(object):
           previous = self.current
           self.current = self.current.next
       return 'Node is not in LinkedList'
+
+def mempty():
+ return None
+
+def mconcat(a,b):
+  if a==None:
+    return b
+  if b==None:
+    return a
+  b_lst=b.to_list()
+  a_lst=a.to_list()
+  for i in b_lst:
+    a_lst.append(i)
+  a.from_list(a_lst)
+  return a
+
+
+# a=LinkedList()
+# a.from_list([1,5,9])
+# b=LinkedList()
+# b.from_list([2,4,6])
+# a.insert(Node(13))
+# print(type(mconcat(a,b)))
 
 
 

@@ -89,10 +89,15 @@ def mempty():
 
 
 def mconcat(head1, head2):
+    if head1 is None:
+        return head2
+    if head2 is None:
+        return head1
     if head1.next is None:
         return head2
     if head2.next is None:
         return head1
+
     else:
         res = head1
         while res.next is not None:
