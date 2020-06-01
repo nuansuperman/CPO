@@ -98,8 +98,7 @@ class TestNode(unittest.TestCase):
         self.assertEqual(remove_hashmap(node1, buckets), 1)
 
 
-    @settings(max_examples=10)
-    @given(st.lists(st.lists(st.integers(1,150),2,2),3))
+    @given(st.lists(st.lists(st.integers(1,150),min_size=2,max_size=2),min_size=3))
     def test_from_list_to_list_equality(self,v):
         head = from_list(v)
         ans = to_list(head)
@@ -107,15 +106,14 @@ class TestNode(unittest.TestCase):
         print('1>', ans)
 
 
-    @settings(max_examples=10)
-    @given(st.lists(st.lists(st.integers(1,150),2,2),3))
+    @given(st.lists(st.lists(st.integers(1,150),min_size=2,max_size=2),min_size=3))
     def test_monoid_identity(self, lst):
         a=from_list(lst)
         self.assertEqual(mconcat(mempty(), a), a)
         self.assertEqual(mconcat(a, mempty()), a)
 
-    @settings(max_examples=5)
-    @given(a=st.lists(st.lists(st.integers(1,15),2,2),3), b=st.lists(st.lists(st.integers(1,15),2,2),3), c=st.lists(st.lists(st.integers(1,15),2,2),3))
+
+    @given(a=st.lists(st.lists(st.integers(1,15),min_size=2,max_size=2),min_size=3), b=st.lists(st.lists(st.integers(1,15),min_size=2,max_size=2),min_size=3), c=st.lists(st.lists(st.integers(1,15),min_size=2,max_size=2),min_size=3))
     def test_monoid_associativity(self, a, b, c):
         l1_1=from_list(a)
         l1_2=from_list(a)
