@@ -25,3 +25,5 @@
 > - Based on the existing code, many tests are performed to correct the error code. (**Yong Ding**)  
 > - Fix bug and writing reports. (**Jie Ruan**)  
 
+## Conclusion
+> -It can be annotated  with @multimethod to assign functions according to different types of arguments and pass optional ,positional and named parameter tests.Multiple-dispatch is initially achieved.
