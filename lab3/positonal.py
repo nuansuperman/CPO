@@ -15,6 +15,7 @@ class Mulitimethod(object):
             raise TypeError("The type already exists")
         self.type[types] = function
 
+
 def multimethod_position(*types): #position parameter
     def register(function):
         name = function.__name__

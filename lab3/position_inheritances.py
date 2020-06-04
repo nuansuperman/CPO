@@ -1,8 +1,11 @@
 from positonal import Mulitimethod
 dict_check={}
+
+
 class Mulitimethod_inheritance(Mulitimethod):
     def nn(self):
         print("It's a class which inherent from Mulitimethod")
+
 
 def multimethod_inheritance(*types): #position parameter
     def register(function):

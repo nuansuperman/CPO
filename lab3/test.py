@@ -53,7 +53,6 @@ class PositionalArgsTestCase(unittest.TestCase):
         self.assertEqual(X.divide(1.0, 2.0), 'float: a/b = 0.5')
 
 
-
 class MultimethodTestCase(unittest.TestCase):
     def test_multimethod(self):
         class test(object):
@@ -71,11 +70,12 @@ class MultimethodTestCase(unittest.TestCase):
             @multimethod_inheritance(dict, dict)
             def foo( a, b):
                 return "dict, dict"
-        X=test()
+        X = test()
         self.assertEqual(X.foo(1,2,3),6)
         self.assertEqual(X.foo(1.2,3.4),4.6)
         self.assertEqual(X.foo("dayday","up"),"daydayup")
         self.assertEqual(X.foo(dict(first_name='yong'), dict(last_name='ding')), "dict, dict")
+
 
 class NamedArgsTest(unittest.TestCase):
     def test_multimethod_name(self):
@@ -94,6 +94,7 @@ class NamedArgsTest(unittest.TestCase):
             return a+b+c+d
         self.assertEqual(foo(11, 22, c=33, d=44), 110)
 
+
 class OptionalArgsTest(unittest.TestCase):
     def test_multimethod_optional(self):
         @multimethod_optional(2)
@@ -111,6 +112,7 @@ class OptionalArgsTest(unittest.TestCase):
         self.assertEqual(foo(123, 456), 579)
         self.assertEqual(foo(123, 456,789), 1368)
         self.assertEqual(foo(1, 2, 3, 4), 10)
+
 
 if __name__ == '__main__':
     unittest.main()
