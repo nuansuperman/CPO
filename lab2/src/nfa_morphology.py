@@ -1,47 +1,42 @@
 from enum import Enum
 # state
 class Symbol(Enum):
-    EOS = 0
-    # rgx's end
-
-    ANY = 1
+    ANY = 0
     # .
 
-    AT_BOL = 2
-    # ^
+    EOS = 1
+    # rgx's end
 
-    AT_EOL = 3
+    AT_EOL = 2
     # $
 
-    CCL_END = 4
-    # ]
+    AT_BOL = 3
+    # ^
 
-    CCL_START = 5
+    CS_begin = 4
     # [
 
-    CLOSE_CURLY = 6
-    # }
+    CS_END = 5
+    # ]
 
-    CLOSE_PAREN = 7
-    # )
-
-    CLOSURE = 8
-    # +
-
-    DASH = 9
-    # -
-
-    END_OF_INPUT = 10
-    #
-
-    L = 11
-    # Character constants
-
-    OPEN_CURLY = 12
+    OPEN_CURLY = 6
     # {
 
-    OPEN_PAREN = 13
+    CLOSE_CURLY = 7
+    # }
+
+    OPEN_PAREN = 8
     # (
+
+    CLOSE_PAREN = 9
+    # )
+
+    CLOSURE = 10
+    # +
+    DASH =11
+    END_OF_INPUT = 12
+    L = 13
+    # Character constants
 
     OPTIONAL = 14
     # ?
@@ -66,14 +61,15 @@ Symbols = {
     '+': Symbol.PLUS_CLOSE,
 }
 
-# morphology analyzer
+
+# Lexical analyzer
 class Morphology(object):
     def __init__(self, pattern):
+        self.position = 0
         self.pattern = pattern
         self.morcontent = ''
-        self.position = 0
-        self.isescape = False
         self.current_state = None
+        self.sawEsc = False
 
     def advance(self):
         position = self.position
@@ -84,8 +80,9 @@ class Morphology(object):
 
         # Handle escape characters
         character = self.morcontent = pattern[position]
+
         if character == '\\':
-            self.isescape = not self.isescape
+            self.sawEsc = not self.sawEsc
             self.position = self.position + 1
             self.current_state = self.handleesc()
         else:
@@ -93,35 +90,37 @@ class Morphology(object):
 
         return self.current_state
 
-    def handleesc(self):
-        expr = self.pattern.lower()
-        position = self.position
-        ev = {
-            '\0': '\\',
-            'n': '\n',
-            'f': '\f',
-            'b': '\b',
-            't': '\t',
-            's': ' ',
-            'e': '\033',
-        }
-        rval = ev.get(expr[position])
-        if rval is None:
-            if expr[position] == '^':
-                rval = self.tip()
-            else:
-                rval = expr[position]
+    def tip(self):
         self.position = self.position + 1
-        self.morcontent = rval
-        return Symbol.L
+        return self.pattern[self.position] - '@'
 
     def semantic(self, character):
         self.position = self.position + 1
         return Symbols.get(character, Symbol.L)
 
-    def tip(self):
-        self.position = self.position + 1
-        return self.pattern[self.position] - '@'
-
     def match(self, state):
         return self.current_state == state
+
+    # When the transfer character '\ 'exists,
+    # it must be interpreted with the character or string that follows it
+    def handleesc(self):
+        exprToUpper = self.pattern.lower()
+        position = self.position
+        eTU = {
+            '\0': '\\',
+            'b': '\b',  #backspace
+            'f': '\f',  #formfeed
+            'n': '\n',  #newline
+            's': ' ',   # space
+            't': '\t',  #tab
+            'e': '\033',#ASCII ESC ('\033')
+        }
+        rval = eTU.get(exprToUpper[position])
+        if rval is None:
+            if exprToUpper[position] == '^':
+                rval = self.tip()
+            else:
+                rval = exprToUpper[position]
+        self.position = self.position + 1
+        self.morcontent = rval
+        return Symbol.L
