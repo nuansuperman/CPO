@@ -6,7 +6,7 @@ class SymbolExpression(unittest.TestCase):
     # test |
     def test_or(self):
         st = "abbbb"
-        pat = "\*?|ab+"
+        pat = "\\*?|ab+"
         result = Regex(st, pat).matchAll()
         self.assertEqual(st, result)
 
@@ -48,13 +48,13 @@ class SymbolExpression(unittest.TestCase):
     # test ()
     def test_match(self):
         st = "bbbbbscccccasbdzx"
-        pat= "(\*?|b+)(xy|sc*)(asb|ebd)(dzx)"
+        pat= "(\\*?|b+)(xy|sc*)(asb|ebd)(dzx)"
         result = Regex(st, pat).matchAll()
         self.assertEqual(st, result)
 
     def test_part_string(self):
         st = 'hwhwhwhwhbbbbbscccccasbdzx'
-        pat= "(\*?|b+)(xy|sc*)(asb|ebd)(dzx)"
+        pat= r"(\*?|b+)(xy|sc*)(asb|ebd)(dzx)"
         result = Regex(st, pat).matchAll()
         self.assertEqual(result, "bbbbbscccccasbdzx")
 
@@ -88,7 +88,7 @@ class SymbolExpression(unittest.TestCase):
         result = Regex(st, pat).matchAll()
         self.assertEqual(result, "2224443333")
         st = 'arkejkwjeihbbbbbscccccasbdzxwhwfsdfdg'
-        pat= "(\*?|b+)(xy|sc*)(asb|ebd)(dzx)"
+        pat= r"(\*?|b+)(xy|sc*)(asb|ebd)(dzx)"
         result = Regex(st, pat).matchAll()
         self.assertEqual(result, "bbbbbscccccasbdzx")
 

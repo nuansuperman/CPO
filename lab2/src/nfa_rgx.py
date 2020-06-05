@@ -28,10 +28,10 @@ class Regex(object):
         return "".join(result)
 
 
-st = 'bbbbbscccccasbdzx'
-pattern = '(\*?|b+)(xy|sc*)(asb|ebd)(dzx)'
-
-regex = Regex(st, pattern)
-result = regex.matchAll()
-print(result)
-print(regex.graph)
+# st = 'bbbbbscccccasbdzx'
+# pattern = '(\*?|b+)(xy|sc*)(asb|ebd)(dzx)'
+#
+# regex = Regex(st, pattern)
+# result = regex.matchAll()
+# print(result)
+# print(regex.graph)
