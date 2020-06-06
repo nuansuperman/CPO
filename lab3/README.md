@@ -18,10 +18,10 @@
 >   - Use unit tests with several multi-methods, which works with standard Python types and user-defined types  
 -Demonstrate how it works with inheritances and multiple inheritances.
 > - ### synopsis:
->   -We designed the multi-dispatch library using decorators and multi-method classes. It can supports multiple-dispatch on positional, optional and named arguments. In the file of test,we test the "foo" function by using named arguments ,and we can use "foo" function regardless of number of parameters. Also,we demonstrate how it works with inheritances and multiple inheritances.
+>   -We designed the multi-dispatch library using decorators and multi-method classes. It can supports multiple-dispatch on positional, optional and named arguments. In the file of test,we test the "foo" function by using named arguments ,and we can use "foo" function regardless of number of parameters. Also,inheritance is demonstrated by inheriting and extending class decorators.
 
 ## Task division
-> - Complete the basic code part together include ``positional.py, optional.py, name.py,test.py``.(**Yong Ding**, **Jie Ruan**)   
+> - Complete the basic code part together include ``example.py, inheritance.py, mutilmenthod.py,test.py``.(**Yong Ding**, **Jie Ruan**)   
 > - Based on the existing code, many tests are performed to correct the error code. (**Yong Ding**)  
 > - Fix bug and writing reports. (**Jie Ruan**)  
 
